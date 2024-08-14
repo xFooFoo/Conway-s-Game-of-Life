@@ -37,6 +37,7 @@ function App() {
     useEffect(() => {
         let lastUpdateTime: number = 0;
         let animationFrameId: number;
+        // requestAnimationFrame automatically assigns a precise timestamp from the browser to the update function
         const update = (timestamp: number) => {
             if (lastUpdateTime === 0) lastUpdateTime = timestamp;
 
@@ -63,11 +64,13 @@ function App() {
                 }
                 lastUpdateTime = timestamp;
             }
+            // this allows the update to loop as long as it's not paused
             if (!isPaused) {
                 animationFrameId = requestAnimationFrame(update);
             }
         };
 
+        // Initial update when the component mounts or when pause state changes to not paused
         if (!isPaused) {
             animationFrameId = requestAnimationFrame(update);
         }
