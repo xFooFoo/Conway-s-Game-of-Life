@@ -131,7 +131,7 @@ export const checkNeighbours = (
     }
     return aliveNeighbours;
 }
-// need a draw board function
+
 export const drawBoard = (
     board: boolean[][],
     ctx: CanvasRenderingContext2D,
@@ -157,5 +157,20 @@ export const drawBoard = (
         }
     }
 }
-// need a start/pause function
 
+export const countLives = (
+    board: boolean[][],
+    TILES_X: number,
+    TILES_Y: number
+) => {
+    let lives: number = 0;
+
+    for (let i = 0; i < TILES_X; i++) {
+        for (let j = 0; j < TILES_Y; j++) {
+            if (board[i][j]) {
+                lives++;
+            }
+        } 
+    }
+    return lives
+}
