@@ -73,6 +73,7 @@ export const generateRandomBoard = (board: boolean[][]): boolean[][] => {
     return board;
 }
 
+// This function updates the board based on the Game of life rules
 export const updateBoard = (oldBoard: boolean[][], TILES_X: number = 20, TILES_Y: number = 20): boolean[][] => {
     const newBoard: boolean[][] = oldBoard.map(row => row.slice());
 
@@ -133,7 +134,8 @@ export const checkNeighbours = (
 }
 
 export const drawBoard = (
-    board: boolean[][],
+    prevBoard: boolean[][],
+    newBoard: boolean[][],
     ctx: CanvasRenderingContext2D,
     TILES_X: number,
     TILES_Y: number,
@@ -142,17 +144,22 @@ export const drawBoard = (
 ) => {
     for (let i = 0; i < TILES_X; i++) {
         for (let j = 0; j < TILES_Y; j++) {
-            // Adjust the probability here to spawn more/less initial lives
-            //console.log(`in draw function ${board[i][j]}`);
-            if (board[i][j]) {
-                ctx.fillStyle = "rgb(0, 255, 0)";
-                ctx.fillRect(i * TILE_SIZE + LINE_WIDTH / 2, j * TILE_SIZE + LINE_WIDTH / 2, TILE_SIZE - LINE_WIDTH, TILE_SIZE - LINE_WIDTH);
-                //    console.log(`Rectangle drawn ${i} ${j}`);
-            }
-            else {
-                ctx.fillStyle = "rgb(0, 0, 0)";
-                ctx.fillRect(i * TILE_SIZE + LINE_WIDTH / 2, j * TILE_SIZE + LINE_WIDTH / 2, TILE_SIZE - LINE_WIDTH, TILE_SIZE - LINE_WIDTH);
-                //    console.log(`Rectangle drawn ${i} ${j}`);
+            // Only update changed cells
+            if (newBoard[i][j] !== prevBoard[i][j]) {
+                // Cell's Alive, green fill
+                if (newBoard[i][j]) {
+                    ctx.fillStyle = "rgb(0, 255, 0)";
+                }
+                // Cell's Dead, black fill
+                else {
+                    ctx.fillStyle = "rgb(0, 0, 0)";
+                }
+                ctx.fillRect(
+                    i * TILE_SIZE + LINE_WIDTH / 2,
+                    j * TILE_SIZE + LINE_WIDTH / 2,
+                    TILE_SIZE - LINE_WIDTH,
+                    TILE_SIZE - LINE_WIDTH
+                );
             }
         }
     }

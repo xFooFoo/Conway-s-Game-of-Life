@@ -7,12 +7,49 @@ import * as script from'./script.tsx'
 function App() {
     const [isPaused, setIsPaused] = useState<boolean>(true);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [board, setBoard] = useState<boolean[][]>([]);
-    const updateSpeed: number = 100; // 1000ms = 1 second
+    const updateSpeed: number = 300; // 1000ms = 1 second
     const TILE_SIZE: number = 5;
     const [generations, setGenerations] = useState<number>(0);
     const [lives, setLives] = useState<number>(0);
 
+/*    const handleMouseDown = (event: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            // Update Logical Board on mouse-down
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width; // DPR adjustment for X
+            const scaleY = canvas.height / rect.height; // DPR adjustment for Y
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            const row: number = Math.floor(x / TILE_SIZE);
+            const col: number = Math.floor(y / TILE_SIZE);
+            console.log(`Canvas clicked at: X=${x}, Y=${y}`);
+
+            setBoard((prevBoard) => {
+                const newBoard = prevBoard.map(row => [...row]);
+                newBoard[row][col] = !newBoard[row][col];
+                // Draw new board
+                const ctx = canvas.getContext('2d');
+                if (canvas && ctx) {
+                    const WIDTH: number = canvas.width;
+                    const HEIGHT: number = canvas.height;
+                    const TILES_X: number = WIDTH / TILE_SIZE;
+                    const TILES_Y: number = HEIGHT / TILE_SIZE;
+
+                    ctx.fillStyle = "rgb(0, 0, 0)";
+                    ctx.strokeStyle = "rgb(80, 80, 80)";
+                    ctx.lineWidth = 1;
+                    const LINE_WIDTH = ctx.lineWidth;
+                    setLives(script.countLives(newBoard, TILES_X, TILES_Y));
+                    script.drawBoard(prevBoard, newBoard, ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH);
+                }
+                return newBoard;
+            });
+        }
+    };*/
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -30,9 +67,13 @@ function App() {
 
             const initialBoard = script.prepareBoard(TILES_X, TILES_Y);
             const randomBoard = script.generateRandomBoard(initialBoard);
-            setBoard(randomBoard);
-            script.drawBoard(randomBoard, ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH);
-            script.drawBorder(ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH, WIDTH, HEIGHT);             
+            setBoard((prevBoard) => {
+                console.log(prevBoard);
+                script.drawBoard(initialBoard, randomBoard, ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH);
+                return randomBoard;
+
+            });
+            script.drawBorder(ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH, WIDTH, HEIGHT);
         }
     }, []); // Empty dependency array means this effect runs once after initial render
 
@@ -54,11 +95,13 @@ function App() {
                     const TILES_X: number = WIDTH / TILE_SIZE;
                     const TILES_Y: number = HEIGHT / TILE_SIZE;
                     const LINE_WIDTH = ctx.lineWidth;
+
                     setBoard((prevBoard) => {
                         // Update Board State & Draw to Canvas every second
                         updatedBoard = script.updateBoard(prevBoard, TILES_X, TILES_Y)
+                        ctx.fillStyle = "rgb(0, 0, 0)";
                         ctx.clearRect(0, 0, WIDTH, HEIGHT); // Clear the canvas before redrawing
-                        script.drawBoard(updatedBoard, ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH);
+                        script.drawBoard(prevBoard, updatedBoard, ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH);
                         // script.drawBorder(ctx, TILES_X, TILES_Y, TILE_SIZE, LINE_WIDTH, WIDTH, HEIGHT);
                         // Count Lives here
                         setLives(script.countLives(updatedBoard, TILES_X, TILES_Y));
@@ -80,10 +123,7 @@ function App() {
         }
 
         return () => cancelAnimationFrame(animationFrameId);
-    }, [isPaused]);
-
-    // Placeholder usage to avoid TS6133 error
-    console.log(board); 
+    }, [isPaused, board]);
 
     return (
         <div className="game-container">
@@ -98,7 +138,13 @@ function App() {
                 <p>Lives: {lives}</p>                    
             </div>
             <div>
-                <canvas id="canvas" ref={canvasRef} width="800" height="600"></canvas>
+                <canvas
+                    id="canvas"
+                    ref={canvasRef}
+                    width="800"
+                    height="600"
+                    //onMouseDown={handleMouseDown}
+                />
                 <button onClick={() => setIsPaused(!isPaused)}>
                     {isPaused ? 'Play' : 'Pause'}
                 </button>
